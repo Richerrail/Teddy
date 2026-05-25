@@ -116,8 +116,20 @@ def main() -> None:
     application.add_handler(CommandHandler("decrypt", decrypt_cmd))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 
-    logger.info("Bot started. Press Ctrl+C to stop.")
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    # Detect if running on Render (web service) or locally
+    render_url = os.environ.get("RENDER_EXTERNAL_URL")
+    if render_url:
+        port = int(os.environ.get("PORT", 10000))
+        webhook_url = f"{render_url}/webhook"
+        logger.info(f"Starting webhook on port {port}, URL: {webhook_url}")
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=port,
+            webhook_url=webhook_url,
+        )
+    else:
+        logger.info("Bot started in polling mode. Press Ctrl+C to stop.")
+        application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":

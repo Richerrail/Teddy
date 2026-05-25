@@ -8,13 +8,17 @@ export TELEGRAM_BOT_TOKEN="ton_token"
 python telegram_bot.py
 ```
 
-## Deploy on Render (free)
+## Deploy on Render (free Web Service)
 
-1. Push this repo to GitHub
-2. Go to [render.com](https://render.com) → New → Blueprint
-3. Connect your GitHub repo
-4. In Render dashboard, go to your service → Environment → add `TELEGRAM_BOT_TOKEN`
+The bot auto-detects Render and switches to **webhook mode**.
+
+1. Push ce repo sur GitHub
+2. Sur [render.com](https://render.com) → New → **Web Service**
+3. Connecte ton repo GitHub
+4. Dans **Environment**, ajoute :
+   - `TELEGRAM_BOT_TOKEN` = ton token
 5. Deploy
 
-The bot runs 24/7 on Render's free worker tier.
-# Teddy
+**Limitation** : le tier gratuit Web Service s'endort après 15 min d'inactivité. Ton bot peut manquer des messages pendant qu'il dort.
+
+Pour un bot 24/7 sans interruption, utilise un **Background Worker** à la place (toujours gratuit sur Render).
