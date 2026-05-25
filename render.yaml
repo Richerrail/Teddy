@@ -1,9 +1,11 @@
 services:
-  - type: worker
+  - type: web
     name: secure-messenger-bot
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python telegram_bot.py
+    startCommand: python app.py
     envVars:
       - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: RENDER_EXTERNAL_URL
         sync: false

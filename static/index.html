@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Secure Messenger</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Secure Messenger</h1>
+        <div class="mode-switch">
+            <button class="mode-btn active" onclick="switchMode('encrypt')">Encrypt</button>
+            <button class="mode-btn" onclick="switchMode('decrypt')">Decrypt</button>
+        </div>
+        <textarea id="input" placeholder="Enter your message..."></textarea>
+        <button class="action-btn" id="actionBtn" onclick="processText()">Encrypt</button>
+        <div class="result" id="result"></div>
+        <button class="copy-btn" id="copyBtn" onclick="copyResult()">Copy</button>
+        <div class="error" id="error"></div>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>
