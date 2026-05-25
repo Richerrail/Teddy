@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -9,16 +9,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Secure Messenger</h1>
+        <h1>Secure Messenger</h1>
         <div class="mode-switch">
-            <button class="mode-btn active" onclick="switchMode('encrypt')">Encrypt</button>
-            <button class="mode-btn" onclick="switchMode('decrypt')">Decrypt</button>
+            <button class="mode-btn active" id="btnEncrypt" onclick="setEncrypt()">Encrypt</button>
+            <button class="mode-btn" id="btnDecrypt" onclick="setDecrypt()">Decrypt</button>
         </div>
-        <textarea id="input" placeholder="Enter your message..."></textarea>
-        <button class="action-btn" id="actionBtn" onclick="processText()">Encrypt</button>
-        <div class="result" id="result"></div>
+        <textarea id="inputText" placeholder="Enter your message..."></textarea>
+        <button class="action-btn" id="actionBtn" onclick="doProcess()">Encrypt</button>
+        <div class="result" id="resultBox"></div>
         <button class="copy-btn" id="copyBtn" onclick="copyResult()">Copy</button>
-        <div class="error" id="error"></div>
+        <div class="error" id="errorBox"></div>
     </div>
     <script src="/static/app.js"></script>
 </body>

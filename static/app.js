@@ -1,60 +1,110 @@
-// Telegram Mini App
-const tg = window.Telegram.WebApp;
-tg.expand();
-tg.ready();
-
-let mode = 'encrypt';
-
-function switchMode(newMode) {
-    mode = newMode;
-    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-    if (event) event.target.classList.add('active');
-    document.getElementById('actionBtn').textContent = mode === 'encrypt' ? 'Encrypt' : 'Decrypt';
-    document.getElementById('input').placeholder = mode === 'encrypt' ? 'Enter your message...' : 'Enter encrypted text...';
-    document.getElementById('result').classList.remove('show');
-    document.getElementById('copyBtn').style.display = 'none';
-    document.getElementById('error').classList.remove('show');
+// Secure Messenger Mini App
+var tg = window.Telegram.WebApp;
+if (tg) {
+    tg.ready();
+    tg.expand();
 }
 
-async function processText() {
-    const input = document.getElementById('input').value.trim();
+var currentMode = 'encrypt';
+
+function setEncrypt() {
+    currentMode = 'encrypt';
+    document.getElementById('btnEncrypt').className = 'mode-btn active';
+    document.getElementById('btnDecrypt').className = 'mode-btn';
+    document.getElementById('actionBtn').textContent = 'Encrypt';
+    document.getElementById('inputText').placeholder = 'Enter your message...';
+    hideResult();
+}
+
+function setDecrypt() {
+    currentMode = 'decrypt';
+    document.getElementById('btnEncrypt').className = 'mode-btn';
+    document.getElementById('btnDecrypt').className = 'mode-btn active';
+    document.getElementById('actionBtn').textContent = 'Decrypt';
+    document.getElementById('inputText').placeholder = 'Enter encrypted text...';
+    hideResult();
+}
+
+function hideResult() {
+    document.getElementById('resultBox').style.display = 'none';
+    document.getElementById('copyBtn').style.display = 'none';
+    document.getElementById('errorBox').style.display = 'none';
+}
+
+function showResult(text) {
+    document.getElementById('resultBox').textContent = text;
+    document.getElementById('resultBox').style.display = 'block';
+    document.getElementById('copyBtn').style.display = 'block';
+    document.getElementById('errorBox').style.display = 'none';
+}
+
+function showError(text) {
+    document.getElementById('errorBox').textContent = text;
+    document.getElementById('errorBox').style.display = 'block';
+    document.getElementById('resultBox').style.display = 'none';
+    document.getElementById('copyBtn').style.display = 'none';
+}
+
+function doProcess() {
+    var input = document.getElementById('inputText').value.trim();
     if (!input) return;
 
-    const btn = document.getElementById('actionBtn');
+    var btn = document.getElementById('actionBtn');
     btn.disabled = true;
-    btn.textContent = mode === 'encrypt' ? 'Encrypting...' : 'Decrypting...';
-    document.getElementById('result').classList.remove('show');
-    document.getElementById('copyBtn').style.display = 'none';
-    document.getElementById('error').classList.remove('show');
+    btn.textContent = currentMode === 'encrypt' ? 'Encrypting...' : 'Decrypting...';
+    hideResult();
 
-    try {
-        const response = await fetch(`/api/${mode}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: input })
-        });
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/' + currentMode, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
-        const data = await response.json();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            btn.disabled = false;
+            btn.textContent = currentMode === 'encrypt' ? 'Encrypt' : 'Decrypt';
 
-        if (!response.ok) {
-            throw new Error(data.detail || 'Request failed');
+            if (xhr.status === 200) {
+                try {
+                    var data = JSON.parse(xhr.responseText);
+                    showResult(data.result);
+                } catch (e) {
+                    showError('Invalid response');
+                }
+            } else {
+                try {
+                    var err = JSON.parse(xhr.responseText);
+                    showError(err.detail || 'Error occurred');
+                } catch (e) {
+                    showError('Request failed: ' + xhr.status);
+                }
+            }
         }
+    };
 
-        document.getElementById('result').textContent = data.result;
-        document.getElementById('result').classList.add('show');
-        document.getElementById('copyBtn').style.display = 'block';
-    } catch (err) {
-        document.getElementById('error').textContent = err.message;
-        document.getElementById('error').classList.add('show');
-    } finally {
+    xhr.onerror = function() {
         btn.disabled = false;
-        btn.textContent = mode === 'encrypt' ? 'Encrypt' : 'Decrypt';
-    }
+        btn.textContent = currentMode === 'encrypt' ? 'Encrypt' : 'Decrypt';
+        showError('Network error');
+    };
+
+    xhr.send(JSON.stringify({text: input}));
 }
 
 function copyResult() {
-    const text = document.getElementById('result').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-        tg.showAlert('Copied to clipboard!');
-    });
+    var text = document.getElementById('resultBox').textContent;
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        if (tg) {
+            tg.showAlert('Copied to clipboard!');
+        }
+    } catch (e) {
+        console.log('Copy failed');
+    }
+    document.body.removeChild(textarea);
 }

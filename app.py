@@ -23,16 +23,35 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# CORS and security headers for Telegram WebView
+@app.after_request
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'ALLOWALL'
+    return response
+
 # Telegram bot token
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
     print("Error: TELEGRAM_BOT_TOKEN not set", file=sys.stderr)
     sys.exit(1)
 
-# Website URL for Mini App (e.g. https://teddy-tedu.onrender.com)
+# Website URL for Mini App - auto-detect on Render
 WEB_URL = os.environ.get("RENDER_EXTERNAL_URL")
 if not WEB_URL:
-    WEB_URL = "http://localhost:5000"
+    # Try to detect from Render environment
+    render_service = os.environ.get("RENDER_SERVICE_NAME")
+    if render_service:
+        WEB_URL = f"https://{render_service}.onrender.com"
+    elif os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+        WEB_URL = f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}"
+    else:
+        WEB_URL = "http://localhost:5000"
+
+logger.info(f"Mini App URL: {WEB_URL}")
 
 # Build Telegram Application (same as before but for webhook + commands)
 application = Application.builder().token(TOKEN).build()
